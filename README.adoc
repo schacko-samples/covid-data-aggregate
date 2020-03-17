@@ -1,0 +1,109 @@
+# covid-data-aggregate
+
+An application to track the daily aggregates of covid-19 from around the world.
+This application uses the data published by https://github.com/CSSEGISandData/COVID-19[Johns Hopkins University] to track the daily numbers of the corona virus that is spreading COVID-19 disease around the world.
+The application will specifically track the https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_daily_reports[daily numbers].
+The application publishes the aggregate numbers for confirmed/fatal/recovered cases per country from the daily totals.
+It also provides a REST endpoint to retrieve the same information.
+
+## Running the application
+
+The following instructions are provided for running this application using a Kubernetes environment and we are using minikube here, but other environments can be used as well.
+
+### Building the app
+
+`./mvnw clean package`
+
+You can also push the docker image to your personal registry. You need to do this, if you want to change the image in the K8S deployment yaml file.
+
+`./mvnw clean package jib:build -Dimage.path=<Path to your registry>`
+
+### Preparing the K8S environment
+
+Start minikube.
+
+If you have other clusters in use, make sure that your context is pointing to the minikubre context.
+
+`kubectl config get-contexts`
+
+Go the `resources/k8s-templates` folder of this project.
+
+```
+kubectl create -f kafka-zk-deployment.yaml
+kubectl create -f kafka-zk-svc.yaml
+
+kubectl create -f kafka-deployment.yaml
+kubectl create -f kafka-svc.yaml
+```
+
+Start a watch session with the following command and monitor its output.
+
+`watch kubectl get pods`
+
+Make sure the Kafka cluster is running.
+
+### Deploying the app
+
+```
+kubectl create -f covid-aggregate.yaml
+kubectl create -f covid-aggregate-svc-lb.yaml
+```
+
+Wait for the applications to be deployed.
+
+### Getting the external IP of the app deployed
+
+```
+export APP_EXTERNAL_IP=kubectl get service covid-aggregate | awk '{print $4}' | grep -v EXTERNAL-IP)
+```
+
+### Montior the aggregate Kafka topic
+
+```
+kubectl exec -it kafka-broker-6d894d559f-hc8db -- /bin/bash (Please change the pod name)
+
+cd /opt/kafka/bin
+
+./kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 --topic covid-aggregate --property print.key=true
+```
+
+### Preparing the source and upload the CSV files
+
+Clone this repo: https://github.com/CSSEGISandData/COVID-19
+
+```
+cd csse_covid_19_data/csse_covid_19_daily_reports
+```
+
+On the command line, execute the following. You can also throw this in a shell script.
+
+```
+for i in `ls *.csv | sort -V`; do echo $i; curl -F data-file=@$i http://$APP_EXTERNAL_IP/upload;  sleep 1; done;
+```
+
+The above for loop will sort the daily csv files in the directory and then upload each one of them to the app upload REST endpoint one every second.
+Watch the above Kafka topic where we are monitoring the aggregate output.
+
+### Querying the state store for specific countries
+
+If you want to find out the total aggregate so far for a specific country, you can invoke another REST endpoint to do that.
+Following are some examples.
+
+```
+curl $APP_EXTERNAL_IP/counts/US
+curl $APP_EXTERNAL_IP/counts/China
+curl $APP_EXTERNAL_IP/counts/Italy
+curl $APP_EXTERNAL_IP/counts/South-Korea
+```
+
+The HTTP response will come back with a JSON with numbers for confirmed cases of COVID-19, fatalities, recoveries so far in the point of time where we are in the stream processing.
+
+### Stopping the components
+
+When you are done, you can stop all the components as below.
+
+```
+kubectl delete pod,deployment,rc,service -l type="covid-demo"
+```
+
+

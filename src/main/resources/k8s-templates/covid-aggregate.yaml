@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: covid-aggregate
+  labels:
+    app: covid-aggregate
+    type: covid-demo
+    component: covid-aggregate
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: covid-aggregate
+  template:
+    metadata:
+      labels:
+        app: covid-aggregate
+        component: covid-aggregate
+    spec:
+      containers:
+        - name: covid-aggregate
+          image: sobychacko/demo-covid:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+              value: kafka:9092
+            - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZKNODES
+              value: kafka-zk:2181
+            - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+              value: health,info
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 60
+          readinessProbe:
+            httpGet:
+              path: /actuator/info
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10

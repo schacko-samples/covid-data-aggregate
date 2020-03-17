@@ -1,0 +1,14 @@
+spring.cloud.stream:
+  function.definition: upload;transform;process
+  source: covid-raw
+  bindings:
+    covid-raw-out-0.destination: covid-raw
+    transform-in-0.destination: covid-raw
+    transform-out-0.destination: covid-transformed
+    process-in-0.destination: covid-transformed
+    process-out-0.destination: covid-aggregate
+  kafka:
+    streams:
+      binder:
+        configuration:
+          commit.interval.ms: 100
