@@ -90,10 +90,10 @@ If you want to find out the total aggregate so far for a specific country, you c
 Following are some examples.
 
 ```
-curl $APP_EXTERNAL_IP/counts/US
-curl $APP_EXTERNAL_IP/counts/China
-curl $APP_EXTERNAL_IP/counts/Italy
-curl $APP_EXTERNAL_IP/counts/South-Korea
+curl $APP_EXTERNAL_IP/counts/US | jq .
+curl $APP_EXTERNAL_IP/counts/China | jq .
+curl $APP_EXTERNAL_IP/counts/Italy | jq .
+curl $APP_EXTERNAL_IP/counts/South-Korea | jq .
 ```
 
 The HTTP response will come back with a JSON with numbers for confirmed cases of COVID-19, fatalities, recoveries so far in the point of time where we are in the stream processing.

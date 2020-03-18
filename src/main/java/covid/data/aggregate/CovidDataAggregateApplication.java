@@ -178,7 +178,7 @@ public class CovidDataAggregateApplication {
 		aggValue.setOrigFileName(newValue.getOrigFileName());
 		aggValue.setLastUpdate(newValue.getLastUpdate());
 	}
-	
+
 	@RequestMapping("/counts/{country}")
 	public CovidDataAggregateByCountry song(@PathVariable("country") String country) {
 		final ReadOnlyKeyValueStore<String, CovidDataAggregate> covidAggreateStore =
@@ -200,6 +200,7 @@ public class CovidDataAggregateApplication {
 		covidDataAggregateByCountry.setConfirmed(covidDataAggregate.getConfirmed());
 		covidDataAggregateByCountry.setDeaths(covidDataAggregate.getDeaths());
 		covidDataAggregateByCountry.setRecovered(covidDataAggregate.getRecovered());
+		covidDataAggregateByCountry.setLastUpdate(covidDataAggregate.getLastUpdate());
 		return covidDataAggregateByCountry;
 	}
 
