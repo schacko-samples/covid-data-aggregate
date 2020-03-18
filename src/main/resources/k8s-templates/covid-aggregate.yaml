@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: covid-aggregate
-          image: sobychacko/demo-covid:latest
+          image: sobychacko/covid-data-aggregate:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080

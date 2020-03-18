@@ -1,7 +1,7 @@
 # covid-data-aggregate
 
 An application to track the daily aggregates of covid-19 from around the world.
-This application uses the data published by https://github.com/CSSEGISandData/COVID-19[Johns Hopkins University] to track the daily numbers of the corona virus that is spreading COVID-19 disease around the world.
+This application uses the data published by https://github.com/CSSEGISandData/COVID-19[Johns Hopkins University] to track the daily numbers of the corona virus outbreak that is spreading COVID-19 disease around the world.
 The application will specifically track the https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_daily_reports[daily numbers].
 The application publishes the aggregate numbers for confirmed/fatal/recovered cases per country from the daily totals.
 It also provides a REST endpoint to retrieve the same information.
@@ -16,7 +16,7 @@ The following instructions are provided for running this application using a Kub
 
 You can also push the docker image to your personal registry. You need to do this, if you want to change the image in the K8S deployment yaml file.
 
-`./mvnw clean package jib:build -Dimage.path=<Path to your registry>`
+`./mvnw clean package jib:build -Dimage=<Path to your registry>`
 
 ### Preparing the K8S environment
 
