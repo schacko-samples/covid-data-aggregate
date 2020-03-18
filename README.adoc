@@ -54,7 +54,7 @@ Wait for the applications to be deployed.
 ### Getting the external IP of the app deployed
 
 ```
-export APP_EXTERNAL_IP=kubectl get service covid-aggregate | awk '{print $4}' | grep -v EXTERNAL-IP)
+export APP_EXTERNAL_IP=$(kubectl get service covid-aggregate | awk '{print $4}' | grep -v EXTERNAL-IP)
 ```
 
 ### Montior the aggregate Kafka topic

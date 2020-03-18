@@ -47,6 +47,7 @@ import org.springframework.web.multipart.MultipartFile;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @SpringBootApplication
+@RestController
 public class CovidDataAggregateApplication {
 
 	String[] HEADERS = {"province", "country", "lastUpdate", "confirmed", "deaths", "recovered"};
@@ -177,32 +178,29 @@ public class CovidDataAggregateApplication {
 		aggValue.setOrigFileName(newValue.getOrigFileName());
 		aggValue.setLastUpdate(newValue.getLastUpdate());
 	}
-
-	@RestController
-	public class FooController {
-
-		@RequestMapping("/counts/{country}")
-		public CovidDataAggregateByCountry song(@PathVariable("country") String country) {
-			final ReadOnlyKeyValueStore<String, CovidDataAggregate> covidAggreateStore =
-					interactiveQueryService.getQueryableStore("aggregate-count-by-country", QueryableStoreTypes.keyValueStore());
-			final KeyValueIterator<String, CovidDataAggregate> all = covidAggreateStore.all();
-			//Sanitize the key for potential case issues
-			String[] key = new String[1];
-			all.forEachRemaining(covidDataAggregateKeyValue -> {
-				if (covidDataAggregateKeyValue.key.toLowerCase().contains(country.toLowerCase())) {
-					key[0] = covidDataAggregateKeyValue.key;
-				}
-			});
-			final CovidDataAggregate covidDataAggregate = covidAggreateStore.get(key[0]);
-			if (covidDataAggregate == null) {
-				throw new IllegalArgumentException("No data found for:  " + key[0]);
+	
+	@RequestMapping("/counts/{country}")
+	public CovidDataAggregateByCountry song(@PathVariable("country") String country) {
+		final ReadOnlyKeyValueStore<String, CovidDataAggregate> covidAggreateStore =
+				interactiveQueryService.getQueryableStore("aggregate-count-by-country", QueryableStoreTypes.keyValueStore());
+		final KeyValueIterator<String, CovidDataAggregate> all = covidAggreateStore.all();
+		//Sanitize the key for potential case issues
+		String[] key = new String[1];
+		all.forEachRemaining(covidDataAggregateKeyValue -> {
+			if (covidDataAggregateKeyValue.key.toLowerCase().contains(country.toLowerCase())) {
+				key[0] = covidDataAggregateKeyValue.key;
 			}
-			CovidDataAggregateByCountry covidDataAggregateByCountry = new CovidDataAggregateByCountry();
-			covidDataAggregateByCountry.setCountry(country);
-			covidDataAggregateByCountry.setConfirmed(covidDataAggregate.getConfirmed());
-			covidDataAggregateByCountry.setDeaths(covidDataAggregate.getDeaths());
-			covidDataAggregateByCountry.setRecovered(covidDataAggregate.getRecovered());
-			return covidDataAggregateByCountry;
+		});
+		final CovidDataAggregate covidDataAggregate = covidAggreateStore.get(key[0]);
+		if (covidDataAggregate == null) {
+			throw new IllegalArgumentException("No data found for:  " + key[0]);
 		}
+		CovidDataAggregateByCountry covidDataAggregateByCountry = new CovidDataAggregateByCountry();
+		covidDataAggregateByCountry.setCountry(country);
+		covidDataAggregateByCountry.setConfirmed(covidDataAggregate.getConfirmed());
+		covidDataAggregateByCountry.setDeaths(covidDataAggregate.getDeaths());
+		covidDataAggregateByCountry.setRecovered(covidDataAggregate.getRecovered());
+		return covidDataAggregateByCountry;
 	}
+
 }
