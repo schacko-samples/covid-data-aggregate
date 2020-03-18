@@ -57,7 +57,7 @@ Wait for the applications to be deployed.
 export APP_EXTERNAL_IP=$(kubectl get service covid-aggregate | awk '{print $4}' | grep -v EXTERNAL-IP)
 ```
 
-### Montior the aggregate Kafka topic
+### Monitor the aggregate Kafka topic
 
 ```
 kubectl exec -it kafka-broker-6d894d559f-hc8db -- /bin/bash (Please change the pod name)
