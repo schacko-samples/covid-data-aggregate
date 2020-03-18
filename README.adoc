@@ -77,6 +77,9 @@ cd csse_covid_19_data/csse_covid_19_daily_reports
 
 On the command line, execute the following. You can also throw this in a shell script.
 
+Make sure you have the `APP_EXTERNAL_IP` defined as an environment variable in the terminal session before executing this.
+See above for that.
+
 ```
 for i in `ls *.csv | sort -V`; do echo $i; curl -F data-file=@$i http://$APP_EXTERNAL_IP/upload;  sleep 1; done;
 ```
@@ -88,6 +91,9 @@ Watch the above Kafka topic where we are monitoring the aggregate output.
 
 If you want to find out the total aggregate so far for a specific country, you can invoke another REST endpoint to do that.
 Following are some examples.
+
+Make sure you have the `APP_EXTERNAL_IP` defined as an environment variable in the terminal session before executing this.
+See above for that. 
 
 ```
 curl $APP_EXTERNAL_IP/counts/US | jq .
