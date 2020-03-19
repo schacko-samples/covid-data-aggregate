@@ -155,7 +155,7 @@ public class CovidDataAggregateApplication {
 											aggValue.setDeaths(aggValue.getDeaths() + newValue.getDeaths());
 											aggValue.setRecovered(aggValue.getRecovered() + newValue.getRecovered());
 											aggValue.setOrigFileName(newValue.getOrigFileName());
-											aggValue.setLastUpdate(newValue.getLastUpdate());
+											updateLastUpdateTime(newValue, aggValue);
 										}
 										else {
 											simpleAggregate(newValue, aggValue);
@@ -176,7 +176,15 @@ public class CovidDataAggregateApplication {
 		aggValue.setDeaths(newValue.getDeaths());
 		aggValue.setRecovered(newValue.getRecovered());
 		aggValue.setOrigFileName(newValue.getOrigFileName());
-		aggValue.setLastUpdate(newValue.getLastUpdate());
+		updateLastUpdateTime(newValue, aggValue);
+	}
+
+	private void updateLastUpdateTime(CovidData newValue, CovidDataAggregate aggValue) {
+		//Do a simply comparison on the lastUpdateDate
+		if (StringUtils.isEmpty(aggValue.getLastUpdate()) ||
+				newValue.getLastUpdate().compareTo(aggValue.getLastUpdate()) > 0) {
+			aggValue.setLastUpdate(newValue.getLastUpdate());
+		}
 	}
 
 	@RequestMapping("/counts/{country}")

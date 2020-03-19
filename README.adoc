@@ -93,7 +93,7 @@ If you want to find out the total aggregate so far for a specific country, you c
 Following are some examples.
 
 Make sure you have the `APP_EXTERNAL_IP` defined as an environment variable in the terminal session before executing this.
-See above for that. 
+See above for that.
 
 ```
 curl $APP_EXTERNAL_IP/counts/US | jq .
