@@ -2,6 +2,7 @@ package covid.data.aggregate;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -51,6 +52,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 public class CovidDataAggregateApplication {
 
 	String[] HEADERS = {"province", "country", "lastUpdate", "confirmed", "deaths", "recovered"};
+	String[] HEADERS_0323 = {"FIPS", "ADMIN2", "province", "country", "lastUpdate", "confirmed", "deaths", "recovered"};
 
 	@Autowired
 	StreamBridge streamBridge;
@@ -67,29 +69,53 @@ public class CovidDataAggregateApplication {
 	public void upload(@RequestParam("data-file") MultipartFile multipartFile) throws IOException {
 		String name = multipartFile.getOriginalFilename();
 		byte[] bytes = multipartFile.getBytes();
-
-		Iterable<CSVRecord> records = CSVFormat.DEFAULT
-				.withHeader(HEADERS)
-				.withFirstRecordAsHeader()
-				.parse(new StringReader(new String(bytes)));
-
-		final List<CovidData> collect = StreamSupport.stream(records.spliterator(), false)
-				.map(csvRecord -> {
-					CovidData covidData = new CovidData();
-					covidData.setProvince(csvRecord.get(0));
-					covidData.setCountry(csvRecord.get(1));
-					if (covidData.getCountry().equalsIgnoreCase("mainland china")) {
-						covidData.setCountry("China");
-					}
-					covidData.setLastUpdate(csvRecord.get(2));
-					covidData.setConfirmed(StringUtils.isEmpty(csvRecord.get(3)) ? 0 : Integer.parseInt(csvRecord.get(3)));
-					covidData.setDeaths(StringUtils.isEmpty(csvRecord.get(4)) ? 0 : Integer.parseInt(csvRecord.get(4)));
-					covidData.setRecovered(StringUtils.isEmpty(csvRecord.get(5)) ? 0 : Integer.parseInt(csvRecord.get(5)));
-					covidData.setOrigFileName(name);
-					return covidData;
-				})
-				.collect(Collectors.toList());
-
+		Iterable<CSVRecord> records;
+		List<CovidData> collect;
+		if (new String(bytes).startsWith("FIPS")) {
+			records = CSVFormat.DEFAULT
+					.withHeader(HEADERS_0323)
+					.withFirstRecordAsHeader()
+					.parse(new StringReader(new String(bytes)));
+			collect = StreamSupport.stream(records.spliterator(), false)
+					.map(csvRecord -> {
+						CovidData covidData = new CovidData();
+						covidData.setAdminArea(csvRecord.get(1));
+						covidData.setProvince(csvRecord.get(2));
+						covidData.setCountry(csvRecord.get(3));
+						if (covidData.getCountry().equalsIgnoreCase("mainland china")) {
+							covidData.setCountry("China");
+						}
+						covidData.setLastUpdate(csvRecord.get(4));
+						covidData.setConfirmed(StringUtils.isEmpty(csvRecord.get(7)) ? 0 : Integer.parseInt(csvRecord.get(7)));
+						covidData.setDeaths(StringUtils.isEmpty(csvRecord.get(8)) ? 0 : Integer.parseInt(csvRecord.get(8)));
+						covidData.setRecovered(StringUtils.isEmpty(csvRecord.get(9)) ? 0 : Integer.parseInt(csvRecord.get(9)));
+						covidData.setOrigFileName(name);
+						return covidData;
+					})
+					.collect(Collectors.toList());
+		}
+		else {
+			records = CSVFormat.DEFAULT
+					.withHeader(HEADERS)
+					.withFirstRecordAsHeader()
+					.parse(new StringReader(new String(bytes)));
+			collect = StreamSupport.stream(records.spliterator(), false)
+					.map(csvRecord -> {
+						CovidData covidData = new CovidData();
+						covidData.setProvince(csvRecord.get(0));
+						covidData.setCountry(csvRecord.get(1));
+						if (covidData.getCountry().equalsIgnoreCase("mainland china")) {
+							covidData.setCountry("China");
+						}
+						covidData.setLastUpdate(csvRecord.get(2));
+						covidData.setConfirmed(StringUtils.isEmpty(csvRecord.get(3)) ? 0 : Integer.parseInt(csvRecord.get(3)));
+						covidData.setDeaths(StringUtils.isEmpty(csvRecord.get(4)) ? 0 : Integer.parseInt(csvRecord.get(4)));
+						covidData.setRecovered(StringUtils.isEmpty(csvRecord.get(5)) ? 0 : Integer.parseInt(csvRecord.get(5)));
+						covidData.setOrigFileName(name);
+						return covidData;
+					})
+					.collect(Collectors.toList());
+		}
 		collect.forEach(t -> streamBridge.send("covid-raw-out-0", t));
 	}
 
@@ -127,9 +153,9 @@ public class CovidDataAggregateApplication {
 
 							@Override
 							public KeyValue<String, CovidData> transform(String key, CovidData value) {
-								final CovidData covidData = deDuplicateStore.get(value.getProvince() + value.getCountry() + value.getLastUpdate() + value.getOrigFileName());
+								final CovidData covidData = deDuplicateStore.get(value.getAdminArea() + value.getProvince() + value.getCountry() + value.getLastUpdate() + value.getOrigFileName());
 								if (covidData == null) {
-									deDuplicateStore.put(value.getProvince() + value.getCountry() + value.getLastUpdate() + value.getOrigFileName(), value);
+									deDuplicateStore.put(value.getAdminArea() + value.getProvince() + value.getCountry() + value.getLastUpdate() + value.getOrigFileName(), value);
 									return KeyValue.pair(key, value);
 								}
 								else {

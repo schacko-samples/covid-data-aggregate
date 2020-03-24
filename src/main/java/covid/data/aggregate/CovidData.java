@@ -13,6 +13,7 @@ public class CovidData {
 
 	private UUID uuid;
 	private String origFileName;
+	private String adminArea;
 
 	public String getProvince() {
 		return province;
@@ -78,4 +79,11 @@ public class CovidData {
 		this.origFileName = origFileName;
 	}
 
+	public String getAdminArea() {
+		return adminArea;
+	}
+
+	public void setAdminArea(String adminArea) {
+		this.adminArea = adminArea;
+	}
 }
