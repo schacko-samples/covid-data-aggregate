@@ -2,7 +2,6 @@ package covid.data.aggregate;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -108,10 +107,18 @@ public class CovidDataAggregateApplication {
 							covidData.setCountry("China");
 						}
 						covidData.setLastUpdate(csvRecord.get(2));
-						covidData.setConfirmed(StringUtils.isEmpty(csvRecord.get(3)) ? 0 : Integer.parseInt(csvRecord.get(3)));
-						covidData.setDeaths(StringUtils.isEmpty(csvRecord.get(4)) ? 0 : Integer.parseInt(csvRecord.get(4)));
-						covidData.setRecovered(StringUtils.isEmpty(csvRecord.get(5)) ? 0 : Integer.parseInt(csvRecord.get(5)));
-						covidData.setOrigFileName(name);
+						if (new String(bytes).contains("FIPS")) {
+							covidData.setConfirmed(StringUtils.isEmpty(csvRecord.get(5)) ? 0 : Integer.parseInt(csvRecord.get(5)));
+							covidData.setDeaths(StringUtils.isEmpty(csvRecord.get(6)) ? 0 : Integer.parseInt(csvRecord.get(6)));
+							covidData.setRecovered(StringUtils.isEmpty(csvRecord.get(7)) ? 0 : Integer.parseInt(csvRecord.get(7)));
+							covidData.setAdminArea(csvRecord.get(9));
+						}
+						else {
+							covidData.setConfirmed(StringUtils.isEmpty(csvRecord.get(3)) ? 0 : Integer.parseInt(csvRecord.get(3)));
+							covidData.setDeaths(StringUtils.isEmpty(csvRecord.get(4)) ? 0 : Integer.parseInt(csvRecord.get(4)));
+							covidData.setRecovered(StringUtils.isEmpty(csvRecord.get(5)) ? 0 : Integer.parseInt(csvRecord.get(5)));
+							covidData.setOrigFileName(name);
+						}
 						return covidData;
 					})
 					.collect(Collectors.toList());
